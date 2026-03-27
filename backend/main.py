@@ -1,13 +1,19 @@
 from fastapi import FastAPI, HTTPException, Depends, Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy import create_engine, Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from passlib.context import CryptContext
 import jwt
 import os
+import pathlib
 from datetime import datetime, timedelta
+
+# Root of the project (one level up from backend/)
+PROJECT_ROOT = pathlib.Path(__file__).parent.parent
 
 # --- Config ---
 SECRET_KEY = os.environ.get("SECRET_KEY", "supersecret")
@@ -80,6 +86,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# --- Serve Frontend ---
+@app.get("/")
+def serve_index():
+    return FileResponse(PROJECT_ROOT / "index.html")
+
+# Browser reload after a POST sends another POST to "/", causing 501 on static servers.
+# Redirect it to GET using the PRG (Post/Redirect/Get) pattern.
+@app.post("/")
+def post_redirect():
+    return RedirectResponse(url="/", status_code=303)
+
+# Static asset directories
+app.mount("/css", StaticFiles(directory=PROJECT_ROOT / "css"), name="css")
+app.mount("/js", StaticFiles(directory=PROJECT_ROOT / "js"), name="js")
 
 # --- Routes ---
 @app.post("/signup")

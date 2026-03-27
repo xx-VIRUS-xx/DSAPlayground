@@ -1,180 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DSA &amp; System Design Playground</title>
-    <link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Algorithm Chronicles</title>
+  <link rel="stylesheet" href="css/game.css">
 </head>
 <body>
-    <!-- Sidebar Navigation -->
-    <nav id="sidebar">
-        <div class="sidebar-header">
-            <h2>🧠 DSA Playground</h2>
-            <p class="tagline">Interview Prep Hub</p>
-        </div>
-        <div class="progress-bar-container">
-            <div class="progress-label">Progress: <span id="progress-pct">0%</span></div>
-            <div class="progress-track"><div id="progress-fill" class="progress-fill"></div></div>
-        </div>
-        <ul class="nav-sections">
-            <li class="nav-section">
-                <button class="nav-section-btn" data-section="approach">
-                    <span class="icon">🎯</span> Problem Solving Approach
-                </button>
-            </li>
-            <li class="nav-section">
-                <button class="nav-section-btn" data-section="patterns">
-                    <span class="icon">🧩</span> LeetCode Patterns
-                </button>
-                <ul class="nav-sub" id="nav-patterns"></ul>
-            </li>
-            <li class="nav-section">
-                <button class="nav-section-btn" data-section="ds">
-                    <span class="icon">📦</span> Data Structures
-                </button>
-                <ul class="nav-sub" id="nav-ds"></ul>
-            </li>
-            <li class="nav-section">
-                <button class="nav-section-btn" data-section="algorithms">
-                    <span class="icon">⚡</span> Algorithms
-                </button>
-                <ul class="nav-sub" id="nav-algorithms"></ul>
-            </li>
-            <li class="nav-section">
-                <button class="nav-section-btn" data-section="sorting">
-                    <span class="icon">📊</span> Sorting Visualizer
-                </button>
-            </li>
-            <li class="nav-section">
-                <button class="nav-section-btn" data-section="system-design">
-                    <span class="icon">🏗️</span> System Design
-                </button>
-                <ul class="nav-sub" id="nav-sd"></ul>
-            </li>
-            <li class="nav-section">
-                <button class="nav-section-btn" data-section="cheatsheet">
-                    <span class="icon">📋</span> Complexity Cheat Sheet
-                </button>
-            </li>
-        </ul>
-    </nav>
 
-    <!-- Mobile menu toggle -->
-    <button id="menu-toggle" class="menu-toggle" aria-label="Toggle menu">☰</button>
+<!-- ═══════════════════════════════════════════
+     INTRO SCREEN
+═══════════════════════════════════════════ -->
+<div id="intro-screen">
+  <canvas id="star-canvas"></canvas>
+  <div class="intro-content">
+    <div class="intro-emblem">⚔️</div>
+    <h1 class="intro-title">The Algorithm Chronicles</h1>
+    <p class="intro-subtitle">The Kingdom of Code lies in chaos.<br>Ancient data structures crumble. Algorithms fall silent.<br>Only a true <em>Code Wanderer</em> can restore order.</p>
+    <div class="intro-stats" id="intro-stats"></div>
+    <button class="btn-start" id="btn-enter-world">
+      <span class="btn-glow"></span>
+      Begin Your Journey
+    </button>
+    <p class="intro-hint">Free exploration · Learn at your own pace · Master the realm</p>
+  </div>
+</div>
 
-    <!-- Main Content Area -->
-    <main id="main-content">
-        <!-- Welcome / Landing -->
-        <section id="section-welcome" class="content-section active">
-            <div class="hero">
-                <h1>Welcome to DSA &amp; System Design Playground</h1>
-                <p class="hero-sub">Your interactive interview preparation hub. Master data structures, algorithms, system design, and LeetCode patterns — all in one place.</p>
-                <div class="hero-cards">
-                    <div class="hero-card" data-goto="approach">
-                        <span class="hero-card-icon">🎯</span>
-                        <h3>Problem Solving</h3>
-                        <p>Learn the step-by-step framework for approaching any coding problem</p>
-                    </div>
-                    <div class="hero-card" data-goto="patterns">
-                        <span class="hero-card-icon">🧩</span>
-                        <h3>14 LeetCode Patterns</h3>
-                        <p>Master the most common patterns that cover 90% of interview problems</p>
-                    </div>
-                    <div class="hero-card" data-goto="ds">
-                        <span class="hero-card-icon">📦</span>
-                        <h3>Data Structures</h3>
-                        <p>Interactive explanations of arrays, trees, graphs, heaps &amp; more</p>
-                    </div>
-                    <div class="hero-card" data-goto="sorting">
-                        <span class="hero-card-icon">📊</span>
-                        <h3>Sorting Visualizer</h3>
-                        <p>Watch sorting algorithms in action with step-by-step animations</p>
-                    </div>
-                    <div class="hero-card" data-goto="algorithms">
-                        <span class="hero-card-icon">⚡</span>
-                        <h3>Core Algorithms</h3>
-                        <p>BFS, DFS, Binary Search, Dynamic Programming, Greedy &amp; more</p>
-                    </div>
-                    <div class="hero-card" data-goto="system-design">
-                        <span class="hero-card-icon">🏗️</span>
-                        <h3>System Design</h3>
-                        <p>Scalability, caching, load balancing, database design &amp; case studies</p>
-                    </div>
-                </div>
-            </div>
-        </section>
+<!-- ═══════════════════════════════════════════
+     WORLD MAP
+═══════════════════════════════════════════ -->
+<div id="world-screen" class="hidden">
+  <canvas id="world-canvas"></canvas>
 
-        <!-- Problem Solving Approach -->
-        <section id="section-approach" class="content-section">
-            <div class="section-inner" id="approach-content"></div>
-        </section>
+  <!-- HUD -->
+  <div class="hud">
+    <div class="hud-hero">
+      <div class="hero-avatar" id="hero-avatar">🧙</div>
+      <div class="hero-info">
+        <div class="hero-name">Code Wanderer</div>
+        <div class="hero-level" id="hero-level">Level 1</div>
+      </div>
+    </div>
+    <div class="hud-xp">
+      <div class="xp-bar-wrap">
+        <div class="xp-bar" id="xp-bar"></div>
+      </div>
+      <div class="xp-text" id="xp-text">0 / 100 XP</div>
+    </div>
+    <div class="hud-stats">
+      <div class="stat-chip" id="stat-quests">📜 0 Quests</div>
+      <div class="stat-chip" id="stat-realms">🗺️ 0/8 Realms</div>
+    </div>
+  </div>
 
-        <!-- LeetCode Patterns -->
-        <section id="section-patterns" class="content-section">
-            <div class="section-inner" id="patterns-content"></div>
-        </section>
+  <!-- Narrator -->
+  <div class="narrator" id="narrator">
+    <div class="narrator-icon">📖</div>
+    <div class="narrator-text" id="narrator-text">Choose a realm to begin your adventure...</div>
+  </div>
 
-        <!-- Data Structures -->
-        <section id="section-ds" class="content-section">
-            <div class="section-inner" id="ds-content"></div>
-        </section>
+  <!-- World Map -->
+  <div class="world-map" id="world-map">
+    <svg class="map-paths" id="map-paths" xmlns="http://www.w3.org/2000/svg"></svg>
+    <!-- Realms are injected by JS -->
+  </div>
 
-        <!-- Algorithms -->
-        <section id="section-algorithms" class="content-section">
-            <div class="section-inner" id="algorithms-content"></div>
-        </section>
+  <!-- Legend -->
+  <div class="map-legend">
+    <div class="legend-item"><span class="dot dot-locked"></span>Locked</div>
+    <div class="legend-item"><span class="dot dot-available"></span>Available</div>
+    <div class="legend-item"><span class="dot dot-complete"></span>Complete</div>
+  </div>
+</div>
 
-        <!-- Sorting Visualizer -->
-        <section id="section-sorting" class="content-section">
-            <div class="section-inner">
-                <h1>📊 Sorting Algorithm Visualizer</h1>
-                <p class="section-desc">Watch sorting algorithms in action. Adjust speed and array size, then hit play!</p>
-                <div class="viz-controls">
-                    <div class="control-group">
-                        <label>Algorithm:</label>
-                        <select id="sort-algo">
-                            <option value="bubble">Bubble Sort</option>
-                            <option value="selection">Selection Sort</option>
-                            <option value="insertion">Insertion Sort</option>
-                            <option value="merge">Merge Sort</option>
-                            <option value="quick">Quick Sort</option>
-                        </select>
-                    </div>
-                    <div class="control-group">
-                        <label>Size: <span id="size-val">30</span></label>
-                        <input type="range" id="arr-size" min="10" max="100" value="30">
-                    </div>
-                    <div class="control-group">
-                        <label>Speed: <span id="speed-val">50</span>ms</label>
-                        <input type="range" id="sort-speed" min="5" max="200" value="50">
-                    </div>
-                    <div class="control-group btn-group">
-                        <button id="sort-generate" class="btn btn-secondary">🔀 New Array</button>
-                        <button id="sort-play" class="btn btn-primary">▶ Sort</button>
-                        <button id="sort-stop" class="btn btn-danger" disabled>⏹ Stop</button>
-                    </div>
-                </div>
-                <div id="sort-info" class="sort-info"></div>
-                <div id="sort-canvas" class="sort-canvas"></div>
-                <div id="sort-steps" class="sort-steps"></div>
-                <div id="sort-code" class="code-block-container"></div>
-            </div>
-        </section>
+<!-- ═══════════════════════════════════════════
+     QUEST MODAL
+═══════════════════════════════════════════ -->
+<div id="quest-modal" class="hidden">
+  <div class="modal-backdrop" id="modal-backdrop"></div>
+  <div class="modal-panel" id="modal-panel">
 
-        <!-- System Design -->
-        <section id="section-system-design" class="content-section">
-            <div class="section-inner" id="sd-content"></div>
-        </section>
+    <div class="modal-header" id="modal-header">
+      <div class="modal-realm-icon" id="modal-icon">⚔️</div>
+      <div>
+        <div class="modal-realm-name" id="modal-realm-name">Realm</div>
+        <div class="modal-realm-sub" id="modal-realm-sub">The Chronicles</div>
+      </div>
+      <button class="modal-close" id="modal-close">✕</button>
+    </div>
 
-        <!-- Complexity Cheat Sheet -->
-        <section id="section-cheatsheet" class="content-section">
-            <div class="section-inner" id="cheatsheet-content"></div>
-        </section>
-    </main>
+    <div class="modal-tabs">
+      <button class="tab-btn active" data-tab="story">📖 Story</button>
+      <button class="tab-btn" data-tab="learn">📚 Learn</button>
+      <button class="tab-btn" data-tab="quests">⚔️ Quests</button>
+      <button class="tab-btn" data-tab="boss">🐉 Boss</button>
+    </div>
 
-    <script src="js/data.js"></script>
-    <script src="js/visualizers.js"></script>
-    <script src="js/app.js"></script>
+    <div class="modal-body" id="modal-body">
+      <!-- content injected by JS -->
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     XP GAIN TOAST
+═══════════════════════════════════════════ -->
+<div class="xp-toast hidden" id="xp-toast">+<span id="xp-toast-val">25</span> XP ✨</div>
+
+<!-- ═══════════════════════════════════════════
+     LEVEL UP OVERLAY
+═══════════════════════════════════════════ -->
+<div class="levelup-overlay hidden" id="levelup-overlay">
+  <div class="levelup-box">
+    <div class="levelup-stars">✨⭐✨</div>
+    <div class="levelup-title">LEVEL UP!</div>
+    <div class="levelup-level" id="levelup-level">Level 2</div>
+    <div class="levelup-msg" id="levelup-msg">You've grown stronger!</div>
+    <button class="btn-levelup-ok" id="btn-levelup-ok">Continue ➜</button>
+  </div>
+</div>
+
+<script src="js/world-data.js"></script>
+<script src="js/game.js"></script>
 </body>
 </html>
