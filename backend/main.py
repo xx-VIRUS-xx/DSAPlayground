@@ -6,7 +6,7 @@ from fastapi.responses import FileResponse, RedirectResponse
 from sqlalchemy import create_engine, Column, Integer, String, Text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
-from passlib.context import CryptContext
+import bcrypt as _bcrypt
 import jwt
 import os
 import pathlib
@@ -42,7 +42,6 @@ class Progress(Base):
 Base.metadata.create_all(bind=engine)
 
 # --- Auth ---
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 
 def get_db():
@@ -52,11 +51,11 @@ def get_db():
     finally:
         db.close()
 
-def verify_password(plain, hashed):
-    return pwd_context.verify(plain, hashed)
+def verify_password(plain: str, hashed: str) -> bool:
+    return _bcrypt.checkpw(plain.encode(), hashed.encode())
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def get_password_hash(password: str) -> str:
+    return _bcrypt.hashpw(password.encode(), _bcrypt.gensalt()).decode()
 
 def create_access_token(data: dict, expires_delta: timedelta = None):
     to_encode = data.copy()
@@ -100,14 +99,25 @@ def post_redirect():
 
 # Static asset directories
 app.mount("/css", StaticFiles(directory=PROJECT_ROOT / "css"), name="css")
-app.mount("/js", StaticFiles(directory=PROJECT_ROOT / "js"), name="js")
+app.mount("/js",  StaticFiles(directory=PROJECT_ROOT / "js"),  name="js")
+
+@app.middleware("http")
+async def no_cache_js(request, call_next):
+    response = await call_next(request)
+    if request.url.path.startswith("/js/") or request.url.path.startswith("/css/"):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+    return response
 
 # --- Routes ---
 @app.post("/signup")
 def signup(username: str = Form(...), password: str = Form(...), db: Session = Depends(get_db)):
-    if db.query(User).filter(User.username == username).first():
-        raise HTTPException(status_code=400, detail="Username already exists")
-    user = User(username=username, hashed_password=get_password_hash(password))
+    if len(username.strip()) < 3:
+        raise HTTPException(status_code=400, detail="Username must be at least 3 characters")
+    if len(password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters")
+    if db.query(User).filter(User.username == username.strip()).first():
+        raise HTTPException(status_code=400, detail="Username already taken")
+    user = User(username=username.strip(), hashed_password=get_password_hash(password))
     db.add(user)
     db.commit()
     db.refresh(user)

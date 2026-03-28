@@ -2,9 +2,13 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>The Algorithm Chronicles</title>
   <link rel="stylesheet" href="css/game.css">
+  <style>
+    #debug-bar { display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999;
+      background:#c0392b; color:#fff; font:13px monospace; padding:8px 14px; white-space:pre-wrap; }
+  </style>
 </head>
 <body>
 
@@ -22,12 +26,15 @@
       <span class="btn-glow"></span>
       Begin Your Journey
     </button>
+    <div class="intro-auth-row">
+      <button class="btn-auth-intro" id="btn-auth-intro">🔑 Sign In to Save Progress</button>
+    </div>
     <p class="intro-hint">Free exploration · Learn at your own pace · Master the realm</p>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     WORLD MAP
+     WORLD SCREEN
 ═══════════════════════════════════════════ -->
 <div id="world-screen" class="hidden">
   <canvas id="world-canvas"></canvas>
@@ -37,9 +44,10 @@
     <div class="hud-hero">
       <div class="hero-avatar" id="hero-avatar">🧙</div>
       <div class="hero-info">
-        <div class="hero-name">Code Wanderer</div>
+        <div class="hero-name" id="hero-name">Code Wanderer</div>
         <div class="hero-level" id="hero-level">Level 1</div>
       </div>
+      <button class="btn-hud-auth" id="btn-hud-auth" title="Sign In">🔑</button>
     </div>
     <div class="hud-xp">
       <div class="xp-bar-wrap">
@@ -53,16 +61,26 @@
     </div>
   </div>
 
-  <!-- Narrator -->
+  <!-- Narrator (bottom bar) -->
   <div class="narrator" id="narrator">
     <div class="narrator-icon">📖</div>
-    <div class="narrator-text" id="narrator-text">Choose a realm to begin your adventure...</div>
+    <div class="narrator-text" id="narrator-text">Hover a realm to hear its legend...</div>
+  </div>
+
+  <!-- Realm Hover Tooltip -->
+  <div class="realm-tooltip hidden" id="realm-tooltip">
+    <div class="tooltip-icon" id="tooltip-icon">🏕️</div>
+    <div class="tooltip-body">
+      <div class="tooltip-name" id="tooltip-name">Realm</div>
+      <div class="tooltip-teaser" id="tooltip-teaser"></div>
+      <div class="tooltip-progress" id="tooltip-progress"></div>
+    </div>
+    <div class="tooltip-cta">Click to explore →</div>
   </div>
 
   <!-- World Map -->
   <div class="world-map" id="world-map">
     <svg class="map-paths" id="map-paths" xmlns="http://www.w3.org/2000/svg"></svg>
-    <!-- Realms are injected by JS -->
   </div>
 
   <!-- Legend -->
@@ -70,6 +88,7 @@
     <div class="legend-item"><span class="dot dot-locked"></span>Locked</div>
     <div class="legend-item"><span class="dot dot-available"></span>Available</div>
     <div class="legend-item"><span class="dot dot-complete"></span>Complete</div>
+    <div class="legend-item"><span class="dot dot-soon"></span>Coming Soon</div>
   </div>
 </div>
 
@@ -96,21 +115,54 @@
       <button class="tab-btn" data-tab="boss">🐉 Boss</button>
     </div>
 
-    <div class="modal-body" id="modal-body">
-      <!-- content injected by JS -->
-    </div>
-
+    <div class="modal-body" id="modal-body"></div>
   </div>
 </div>
 
 <!-- ═══════════════════════════════════════════
-     XP GAIN TOAST
+     AUTH MODAL
+═══════════════════════════════════════════ -->
+<div id="auth-modal" class="hidden">
+  <div class="modal-backdrop" id="auth-backdrop"></div>
+  <div class="auth-panel">
+    <button class="modal-close auth-close-btn" id="auth-close">✕</button>
+    <div class="auth-emblem">🔑</div>
+    <h2 class="auth-title">Save Your Journey</h2>
+    <p class="auth-subtitle">Sync your progress across all devices</p>
+
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-auth="login">Sign In</button>
+      <button class="auth-tab" data-auth="signup">Sign Up</button>
+    </div>
+
+    <form class="auth-form" id="auth-form" autocomplete="off">
+      <div class="auth-field">
+        <label>Username</label>
+        <input type="text" id="auth-username" placeholder="Enter username" autocomplete="username" />
+      </div>
+      <div class="auth-field">
+        <label>Password</label>
+        <input type="password" id="auth-password" placeholder="Enter password" autocomplete="current-password" />
+      </div>
+      <div class="auth-error hidden" id="auth-error"></div>
+      <button type="submit" class="btn-auth-submit" id="btn-auth-submit">Sign In</button>
+    </form>
+
+    <div class="auth-footer" id="auth-logged-in" style="display:none">
+      <div class="auth-logged-row">
+        <span class="auth-logged-name" id="auth-logged-name">Wanderer</span>
+        <span class="auth-logged-badge">✅ Signed In</span>
+      </div>
+      <button class="btn-auth-logout" id="btn-auth-logout">Sign Out</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     XP TOAST / LEVEL UP
 ═══════════════════════════════════════════ -->
 <div class="xp-toast hidden" id="xp-toast">+<span id="xp-toast-val">25</span> XP ✨</div>
 
-<!-- ═══════════════════════════════════════════
-     LEVEL UP OVERLAY
-═══════════════════════════════════════════ -->
 <div class="levelup-overlay hidden" id="levelup-overlay">
   <div class="levelup-box">
     <div class="levelup-stars">✨⭐✨</div>
@@ -121,7 +173,29 @@
   </div>
 </div>
 
-<script src="js/world-data.js"></script>
-<script src="js/game.js"></script>
+<!-- ── Backend API URL ──────────────────────────────────────────────────
+     If your frontend and backend are on different servers, set this to
+     your backend URL (e.g. https://your-backend.onrender.com).
+     Leave empty string '' if FastAPI serves everything on the same server.
+─────────────────────────────────────────────────────────────────────── -->
+<script>
+  window.ALGO_API_BASE = '';
+  // Surface any JS errors visually so we can see what's breaking
+  window.onerror = function(msg, src, line, col, err) {
+    var bar = document.getElementById('debug-bar');
+    if (!bar) { bar = document.createElement('div'); bar.id='debug-bar'; document.body.appendChild(bar); }
+    bar.style.display = 'block';
+    bar.textContent = '❌ JS ERROR: ' + msg + '\n' + (src||'') + ':' + line;
+    return false;
+  };
+  window.addEventListener('unhandledrejection', function(e) {
+    var bar = document.getElementById('debug-bar');
+    if (!bar) { bar = document.createElement('div'); bar.id='debug-bar'; document.body.appendChild(bar); }
+    bar.style.display = 'block';
+    bar.textContent = '❌ PROMISE ERROR: ' + (e.reason && e.reason.message || e.reason);
+  });
+</script>
+<script src="js/world-data.js?v=1774637820"></script>
+<script src="js/game.js?v=1774637820"></script>
 </body>
 </html>

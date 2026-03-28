@@ -676,6 +676,29 @@ class ConsistentHash:
         description: "Billions of requests flood the Citadel gates. Design a URL shortener that can handle 100M daily users.",
         problem: { title: "Design TinyURL — Rate Limiter + Base62", url: "https://leetcode.com/problems/encode-and-decode-tinyurl/", xp: 120 }
       }
+    },
+
+    /* ══════════════════════════════════════
+       REALM 9 — COMING SOON
+    ══════════════════════════════════════ */
+    {
+      id: "beyond",
+      name: "The Void Beyond",
+      icon: "🌌",
+      color: "#636e72",
+      glowColor: "rgba(99,110,114,0.25)",
+      x: 80, y: 48,
+      unlockRequires: ["system-design", "dp"],
+      comingSoon: true,
+      xpReward: 0,
+      story: {
+        arrival: "Beyond the known map lies a realm shrouded in starless fog. Whispers speak of advanced algorithms yet to be discovered — Tries, Segment Trees, Bit Manipulation, Competitive Programming arcana.",
+        conflict: "",
+        resolution: ""
+      },
+      concepts: [],
+      quests: [],
+      boss: null
     }
 
   ] // end realms

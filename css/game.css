@@ -537,12 +537,378 @@ body { background: var(--bg); color: var(--text); }
   100% { opacity: 0; transform: translate(var(--dx),var(--dy)) scale(0.5); }
 }
 
-/* ─── RESPONSIVE ───────────────────────────────── */
-@media (max-width: 600px) {
-  .hud { top: 10px; left: 10px; right: 10px; min-width: unset; }
-  .modal-panel { width: 97vw; max-height: 92vh; border-radius: 14px; }
-  .realm-icon { width: 40px; height: 40px; font-size: 1.2rem; }
+/* ─── REALM TOOLTIP ────────────────────────────── */
+.realm-tooltip {
+  position: fixed; z-index: 60;
+  width: 260px;
+  background: rgba(10,12,22,0.95); backdrop-filter: blur(20px);
+  border: 1px solid rgba(255,255,255,0.1); border-radius: 14px;
+  padding: 14px 16px; pointer-events: none;
+  display: flex; gap: 12px; align-items: flex-start;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  opacity: 0; transform: scale(0.94) translateY(6px);
+  transition: opacity 0.18s ease, transform 0.18s ease;
+}
+.realm-tooltip.tip-visible {
+  opacity: 1; transform: scale(1) translateY(0);
+}
+.tooltip-icon { font-size: 1.8rem; flex-shrink: 0; }
+.tooltip-body { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+.tooltip-name { font-size: 0.88rem; font-weight: 800; color: var(--text); }
+.tooltip-teaser { font-size: 0.74rem; color: var(--text-dim); line-height: 1.4; }
+.tooltip-progress { font-size: 0.7rem; color: var(--gold); margin-top: 2px; font-weight: 600; }
+.tooltip-cta { font-size: 0.68rem; color: var(--purple); font-weight: 700; letter-spacing: 0.3px; margin-top: 4px; }
+
+/* ─── TRAVEL ANIMATION ─────────────────────────── */
+.realm-traveling .realm-icon {
+  animation: travel-pulse 0.4s ease-out;
+}
+@keyframes travel-pulse {
+  0%   { transform: scale(1); box-shadow: 0 0 20px var(--realm-glow); }
+  50%  { transform: scale(1.35); box-shadow: 0 0 50px var(--realm-glow), 0 0 80px var(--realm-glow); }
+  100% { transform: scale(1); }
+}
+
+/* World screen entrance fade */
+.world-enter { animation: world-fade-in 0.8s ease; }
+@keyframes world-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+/* ─── AMBIENT ORBS ─────────────────────────────── */
+.ambient-orb {
+  position: absolute; z-index: 2; border-radius: 50%;
+  pointer-events: none; filter: blur(40px);
+  animation: orb-drift linear infinite;
+}
+@keyframes orb-drift {
+  0%   { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  33%  { transform: translate(30px, -20px) scale(1.1); opacity: 0.4; }
+  66%  { transform: translate(-20px, 15px) scale(0.9); opacity: 0.7; }
+  100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+}
+
+/* ─── COMING SOON REALM ────────────────────────── */
+.realm-soon {
+  cursor: default;
+}
+.realm-soon:hover { transform: translate(-50%, -50%) !important; }
+
+.realm-pulse-soon {
+  position: absolute; width: 56px; height: 56px; border-radius: 50%;
+  background: rgba(99,110,114,0.15);
+  animation: pulse-soon 3s ease-in-out infinite;
+}
+@keyframes pulse-soon {
+  0%,100% { transform: scale(1); opacity: 0.3; }
+  50%      { transform: scale(1.3); opacity: 0.1; }
+}
+
+.realm-icon-soon {
+  width: 52px; height: 52px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.5rem; position: relative; z-index: 1;
+  background: rgba(10,12,20,0.85);
+  border: 2px dashed rgba(99,110,114,0.4);
+  filter: grayscale(0.7) brightness(0.6);
+}
+
+.soon-badge {
+  font-size: 0.62rem; font-weight: 800; letter-spacing: 1.5px;
+  color: rgba(99,110,114,0.8);
+  background: rgba(99,110,114,0.12); border: 1px solid rgba(99,110,114,0.25);
+  border-radius: 50px; padding: 3px 10px; text-transform: uppercase;
+  animation: soon-shimmer 2.5s ease-in-out infinite;
+}
+@keyframes soon-shimmer {
+  0%,100% { opacity: 0.5; }
+  50%      { opacity: 1; }
+}
+.dot-soon { background: rgba(99,110,114,0.5); border: 1px dashed rgba(99,110,114,0.5); }
+
+/* ─── HUD AUTH BUTTON ──────────────────────────── */
+.btn-hud-auth {
+  margin-left: auto; background: rgba(108,92,231,0.15);
+  border: 1px solid rgba(108,92,231,0.3); border-radius: 8px;
+  font-size: 1rem; cursor: pointer; padding: 4px 8px;
+  transition: var(--transition); color: var(--text);
+}
+.btn-hud-auth:hover { background: rgba(108,92,231,0.3); }
+
+/* ─── INTRO AUTH ROW ───────────────────────────── */
+.intro-auth-row { display: flex; justify-content: center; }
+.btn-auth-intro {
+  background: none; border: 1px solid rgba(255,255,255,0.15);
+  color: var(--text-dim); padding: 8px 22px; border-radius: 50px;
+  font-size: 0.85rem; cursor: pointer; transition: var(--transition);
+}
+.btn-auth-intro:hover { border-color: rgba(108,92,231,0.5); color: var(--text); }
+
+/* ─── AUTH MODAL ───────────────────────────────── */
+#auth-modal {
+  position: fixed; inset: 0; z-index: 300;
+  display: flex; align-items: center; justify-content: center;
+}
+
+.auth-panel {
+  position: relative; z-index: 1;
+  width: min(90vw, 420px);
+  background: var(--bg2);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 22px;
+  padding: 36px 32px 28px;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.7);
+  display: flex; flex-direction: column; align-items: center; gap: 10px;
+  animation: modal-in 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.auth-close-btn {
+  position: absolute; top: 14px; right: 16px;
+  background: none; border: none; color: var(--text-dim);
+  font-size: 1rem; cursor: pointer; padding: 4px 8px; border-radius: 6px;
+  transition: var(--transition);
+}
+.auth-close-btn:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+.auth-emblem { font-size: 2.5rem; filter: drop-shadow(0 0 16px rgba(108,92,231,0.6)); }
+.auth-title  { font-size: 1.3rem; font-weight: 800; }
+.auth-subtitle { font-size: 0.82rem; color: var(--text-dim); margin-top: -4px; }
+
+.auth-tabs {
+  display: flex; gap: 4px;
+  background: rgba(255,255,255,0.04); border-radius: 50px; padding: 4px;
+  margin-top: 6px;
+}
+.auth-tab {
+  background: none; border: none; color: var(--text-dim);
+  padding: 8px 24px; border-radius: 50px; font-size: 0.85rem;
+  font-weight: 700; cursor: pointer; transition: var(--transition);
+}
+.auth-tab.active {
+  background: rgba(108,92,231,0.25); color: var(--text);
+  box-shadow: 0 2px 10px rgba(108,92,231,0.2);
+}
+
+.auth-form {
+  width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 6px;
+}
+.auth-field { display: flex; flex-direction: column; gap: 5px; }
+.auth-field label { font-size: 0.75rem; font-weight: 700; color: var(--text-dim); letter-spacing: 0.5px; }
+.auth-field input {
+  background: var(--bg3); border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px; padding: 12px 14px; color: var(--text);
+  font-size: max(16px, 0.9rem); outline: none; transition: var(--transition);
+  width: 100%;
+}
+.auth-field input:focus { border-color: rgba(108,92,231,0.5); box-shadow: 0 0 0 3px rgba(108,92,231,0.1); }
+
+.auth-error {
+  background: rgba(225,112,85,0.12); border: 1px solid rgba(225,112,85,0.3);
+  border-radius: 8px; padding: 10px 14px;
+  font-size: 0.82rem; color: var(--red);
+}
+
+.btn-auth-submit {
+  width: 100%; padding: 13px; border: none; border-radius: 50px; cursor: pointer;
+  background: linear-gradient(135deg, #6c5ce7, #a29bfe);
+  color: #fff; font-size: 0.95rem; font-weight: 700;
+  transition: var(--transition); box-shadow: 0 4px 20px rgba(108,92,231,0.35);
+  margin-top: 2px;
+}
+.btn-auth-submit:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 6px 28px rgba(108,92,231,0.5); }
+.btn-auth-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+.auth-footer { width: 100%; }
+.auth-logged-row {
+  display: flex; justify-content: space-between; align-items: center;
+  background: rgba(0,184,148,0.08); border: 1px solid rgba(0,184,148,0.2);
+  border-radius: 10px; padding: 12px 16px; margin-bottom: 12px;
+}
+.auth-logged-name { font-weight: 800; font-size: 0.95rem; }
+.auth-logged-badge { font-size: 0.78rem; color: var(--green); font-weight: 700; }
+
+.btn-auth-logout {
+  width: 100%; padding: 10px; border: none; border-radius: 50px; cursor: pointer;
+  background: rgba(225,112,85,0.1); border: 1px solid rgba(225,112,85,0.3);
+  color: var(--red); font-size: 0.85rem; font-weight: 700;
+  transition: var(--transition);
+}
+.btn-auth-logout:hover { background: rgba(225,112,85,0.2); }
+
+/* ─── TOUCH — fast tap on interactive elements ──── */
+.realm-node, .tab-btn, .btn-start, .btn-quest, .btn-complete,
+.btn-boss-open, .btn-boss-defeat, .btn-auth-submit, .auth-tab,
+.btn-hud-auth, .btn-auth-intro, .btn-levelup-ok {
+  touch-action: manipulation;
+}
+
+/* ─── REALM NODE — touch press feedback ────────── */
+.realm-icon-touch {
+  transform: scale(1.18) !important;
+  transition: transform 0.1s ease !important;
+}
+
+/* ─── MOBILE SWIPE HINT ─────────────────────────── */
+.mobile-map-hint {
+  position: absolute; bottom: 12px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 15; pointer-events: none;
+  background: rgba(10,12,20,0.75); backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.08); border-radius: 50px;
+  padding: 5px 14px; font-size: 0.7rem; color: var(--text-dim);
+  white-space: nowrap;
+  animation: hint-fade 3s ease 1.5s forwards;
+  opacity: 0;
+}
+@keyframes hint-fade {
+  0%   { opacity: 0; }
+  15%  { opacity: 1; }
+  75%  { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+/* ─── RESPONSIVE — TABLET (≤ 900px) ────────────── */
+@media (max-width: 900px) {
+  .modal-panel { width: min(96vw, 720px); }
+  .hud { min-width: 200px; }
+}
+
+/* ─── RESPONSIVE — MOBILE (≤ 640px) ────────────── */
+@media (max-width: 640px) {
+
+  /* ── Intro ── */
+  .intro-content { padding: 24px 18px; gap: 14px; max-width: 100%; }
+  .intro-emblem { font-size: 2.8rem; }
+  .intro-subtitle { font-size: 0.88rem; line-height: 1.65; }
+  .btn-start { padding: 13px 32px; font-size: 1rem; }
+  .intro-hint { font-size: 0.73rem; }
+  .resume-banner { font-size: 0.82rem; padding: 8px 16px; }
+
+  /* ── HUD — compact horizontal strip ── */
+  .hud {
+    top: 0; left: 0; right: 0;
+    min-width: unset; max-width: none;
+    border-radius: 0 0 14px 14px;
+    padding: 8px 12px 10px;
+    flex-direction: row; align-items: center; gap: 8px;
+  }
+  .hud-hero { gap: 8px; flex-shrink: 0; }
+  .hero-avatar { font-size: 1.4rem; }
+  .hero-name {
+    font-size: 0.68rem;
+    max-width: 80px; overflow: hidden;
+    text-overflow: ellipsis; white-space: nowrap;
+  }
+  .hero-level { font-size: 0.62rem; }
+  .hud-xp { flex: 1; min-width: 50px; }
+  .xp-text { font-size: 0.6rem; }
+  .hud-stats { display: none; }
+  .btn-hud-auth { margin-left: 2px; flex-shrink: 0; }
+
+  /* ── World map — clear HUD, scrollable for tight nodes ── */
+  .world-map {
+    top: 62px; bottom: 0; left: 0; right: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  /* Pseudo-element forces horizontal scroll area so % positions work against ~600px */
+  .world-map::before {
+    content: '';
+    position: absolute; left: 0; top: 0;
+    width: 600px; height: 1px;
+    pointer-events: none;
+  }
+
+  /* ── Narrator — left/right anchored instead of translateX(-50%) ── */
+  .narrator {
+    left: 10px; right: 10px;
+    bottom: 12px; width: auto; max-width: none;
+    transform: translateY(16px);
+    padding: 10px 13px;
+  }
+  .narrator.visible { transform: translateY(0); }
+  .narrator-text { font-size: 0.82rem; }
+
+  /* ── Realm nodes — adequate touch targets ── */
+  .realm-icon, .realm-icon-soon {
+    width: 44px; height: 44px; font-size: 1.2rem;
+  }
+  .realm-pulse, .realm-pulse-soon { width: 44px; height: 44px; }
   .realm-label { font-size: 0.62rem; }
+  .realm-progress { display: none; }
+  .realm-lock { display: none; }
+  .soon-badge { font-size: 0.56rem; letter-spacing: 1px; }
+
+  /* ── Legend and tooltip ── */
   .map-legend { display: none; }
-  .narrator { bottom: 10px; padding: 10px 16px; }
+  .realm-tooltip { display: none !important; }
+
+  /* ── Quest modal — bottom sheet ── */
+  #quest-modal { align-items: flex-end; }
+  .modal-panel {
+    width: 100vw; max-height: 92vh;
+    border-radius: 20px 20px 0 0; border-bottom: none;
+  }
+  .modal-header { padding: 14px 16px 12px; gap: 12px; }
+  .modal-realm-icon { font-size: 1.8rem; }
+  .modal-realm-name { font-size: 1.05rem; }
+  .modal-realm-sub { font-size: 0.7rem; }
+  .tab-btn { padding: 11px 10px; font-size: 0.78rem; letter-spacing: 0; }
+  .modal-body { padding: 14px; }
+
+  /* Story */
+  .story-section { padding: 13px; }
+  .story-section h3 { font-size: 0.82rem; }
+  .story-section p { font-size: 0.86rem; }
+  .reward-xp { padding: 8px 20px; font-size: 0.82rem; }
+
+  /* Learn */
+  .concept-header { padding: 13px 16px; font-size: 0.85rem; }
+  .concept-body { padding: 0 14px 16px; }
+  .concept-code { font-size: 0.76rem; padding: 12px 14px; }
+
+  /* Quests — stack actions below info */
+  .quest-item { flex-direction: column; gap: 10px; padding: 13px 14px; }
+  .quest-actions { flex-direction: row; justify-content: flex-end; align-items: center; }
+  .quest-hint { font-size: 0.74rem; }
+
+  /* Boss */
+  .boss-portrait { font-size: 3.5rem; }
+  .boss-name { font-size: 1.2rem; }
+  .boss-desc { font-size: 0.84rem; }
+  .btn-boss-open { padding: 11px 26px; font-size: 0.88rem; }
+  .btn-boss-defeat { padding: 9px 24px; font-size: 0.84rem; }
+
+  /* ── Level up ── */
+  .levelup-box { padding: 32px 22px; margin: 0 16px; }
+  .levelup-level { font-size: 2.4rem; }
+  .levelup-msg { font-size: 0.9rem; margin: 10px 0 22px; }
+
+  /* ── Auth modal — bottom sheet ── */
+  #auth-modal { align-items: flex-end; }
+  .auth-panel {
+    width: 100vw; border-radius: 20px 20px 0 0;
+    padding: 24px 20px calc(28px + env(safe-area-inset-bottom, 0px));
+  }
+  .auth-title { font-size: 1.15rem; }
+  .auth-tab { padding: 7px 18px; font-size: 0.82rem; }
+  .auth-field input { padding: 11px 12px; font-size: max(16px, 0.88rem); }
+
+  /* ── Safe area — narrator & modals clear home bar ── */
+  .narrator { bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .modal-panel { padding-bottom: env(safe-area-inset-bottom, 0px); }
+  .auth-panel { padding-bottom: calc(28px + env(safe-area-inset-bottom, 0px)); }
+
+  /* ── XP toast ── */
+  .xp-toast { right: 14px; top: 14%; font-size: 0.95rem; padding: 10px 20px; }
+}
+
+/* ─── RESPONSIVE — VERY SMALL (≤ 400px) ────────── */
+@media (max-width: 400px) {
+  .realm-icon, .realm-icon-soon { width: 40px; height: 40px; font-size: 1.1rem; }
+  .realm-pulse, .realm-pulse-soon { width: 40px; height: 40px; }
+  .realm-label { font-size: 0.58rem; }
+  .tab-btn { padding: 10px 7px; font-size: 0.72rem; }
+  .intro-title { font-size: clamp(1.6rem, 8vw, 2.4rem); }
+  .hero-name { max-width: 65px; }
 }
