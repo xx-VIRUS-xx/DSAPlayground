@@ -854,10 +854,99 @@
   /* ── Boot ──────────────────────────────────────── */
   initStars('star-canvas');
   showIntroStats();
+  initFeedback();
 
   /* ── Utility ────────────────────────────────────── */
   function escHtml(s) {
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  /* ── Feedback ───────────────────────────────────── */
+  function initFeedback() {
+    loadFeedback();
+
+    // Show submission form only when logged in
+    if (authToken) {
+      document.getElementById('feedback-form-wrap')?.classList.remove('hidden');
+    }
+
+    // Star picker interaction
+    let selectedRating = 0;
+    const stars = document.querySelectorAll('.fstar');
+    stars.forEach(s => {
+      s.addEventListener('mouseenter', () => {
+        const v = parseInt(s.dataset.v);
+        stars.forEach(x => x.classList.toggle('lit', parseInt(x.dataset.v) <= v));
+      });
+      s.addEventListener('mouseleave', () => {
+        stars.forEach(x => x.classList.toggle('lit', parseInt(x.dataset.v) <= selectedRating));
+      });
+      s.addEventListener('click', () => {
+        selectedRating = parseInt(s.dataset.v);
+        stars.forEach(x => x.classList.toggle('lit', parseInt(x.dataset.v) <= selectedRating));
+      });
+    });
+
+    document.getElementById('feedback-form')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = document.getElementById('feedback-msg').value.trim();
+      const statusEl = document.getElementById('feedback-form-status');
+      statusEl.className = 'feedback-form-status';
+      if (msg.length < 10) { statusEl.className += ' err'; statusEl.textContent = 'Please write at least 10 characters.'; return; }
+      if (!selectedRating) { statusEl.className += ' err'; statusEl.textContent = 'Please select a star rating.'; return; }
+      try {
+        const fd = new FormData();
+        fd.append('message', msg);
+        fd.append('rating', selectedRating);
+        const res = await fetch(`${API_BASE}/feedback`, {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${authToken}` },
+          body: fd
+        });
+        const data = await parseApiResponse(res, 'Failed to submit feedback');
+        if (!res.ok) throw new Error(data.detail || 'Error');
+        statusEl.textContent = 'Thanks for your feedback!';
+        document.getElementById('feedback-msg').value = '';
+        selectedRating = 0;
+        stars.forEach(x => x.classList.remove('lit'));
+        loadFeedback();
+      } catch (err) {
+        statusEl.className += ' err';
+        statusEl.textContent = err.message || 'Could not submit.';
+      }
+    });
+  }
+
+  async function loadFeedback() {
+    try {
+      const res  = await fetch(`${API_BASE}/feedback`);
+      const data = await res.json();
+      renderFeedback(data.feedback || []);
+    } catch { /* silently ignore if backend unreachable */ }
+  }
+
+  function renderFeedback(items) {
+    const inner = document.getElementById('feedback-inner');
+    const empty = document.getElementById('feedback-empty');
+    if (!items.length) {
+      if (empty) empty.classList.remove('hidden');
+      inner.classList.remove('scrolling');
+      return;
+    }
+    if (empty) empty.classList.add('hidden');
+    // Build cards (duplicate set for seamless scroll if enough items)
+    const set = items.length >= 3 ? [...items, ...items] : items;
+    inner.innerHTML = set.map(fb => {
+      const stars = '★'.repeat(fb.rating) + '☆'.repeat(5 - fb.rating);
+      return `<div class="fcard">
+        <div class="fcard-top">
+          <span class="fcard-name">${escHtml(fb.username)}</span>
+          <span class="fcard-stars">${stars}</span>
+        </div>
+        <p class="fcard-msg">"${escHtml(fb.message)}"</p>
+      </div>`;
+    }).join('');
+    if (items.length >= 3) inner.classList.add('scrolling');
   }
 
 })();

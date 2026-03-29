@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <title>The Algorithm Chronicles</title>
-  <link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/game.css?v=2">
   <style>
     #debug-bar { display:none; position:fixed; bottom:0; left:0; right:0; z-index:9999;
       background:#c0392b; color:#fff; font:13px monospace; padding:8px 14px; white-space:pre-wrap; }
@@ -31,6 +31,37 @@
     </div>
     <p class="intro-hint">Free exploration · Learn at your own pace · Master the realm</p>
   </div>
+
+  <!-- ── Feedback Section ── -->
+  <div class="feedback-section" id="feedback-section">
+    <div class="feedback-heading">✦ Voices from the Realm ✦</div>
+
+    <!-- Submit form (shown only when logged in) -->
+    <div class="feedback-form-wrap hidden" id="feedback-form-wrap">
+      <form class="feedback-form" id="feedback-form">
+        <textarea class="feedback-textarea" id="feedback-msg" placeholder="Share your experience..." maxlength="300" rows="3"></textarea>
+        <div class="feedback-form-row">
+          <div class="feedback-stars-pick" id="feedback-stars-pick">
+            <span class="fstar" data-v="1">★</span>
+            <span class="fstar" data-v="2">★</span>
+            <span class="fstar" data-v="3">★</span>
+            <span class="fstar" data-v="4">★</span>
+            <span class="fstar" data-v="5">★</span>
+          </div>
+          <button type="submit" class="btn-feedback-submit">Post</button>
+        </div>
+        <div class="feedback-form-status" id="feedback-form-status"></div>
+      </form>
+    </div>
+
+    <!-- Feed of real submitted feedback -->
+    <div class="feedback-track" id="feedback-track">
+      <div class="feedback-inner" id="feedback-inner">
+        <div class="feedback-empty" id="feedback-empty">No feedback yet — be the first to share!</div>
+      </div>
+    </div>
+  </div>
+
 </div>
 
 <!-- ═══════════════════════════════════════════
@@ -195,7 +226,7 @@
     bar.textContent = '❌ PROMISE ERROR: ' + (e.reason && e.reason.message || e.reason);
   });
 </script>
-<script src="js/world-data.js?v=1774637820"></script>
-<script src="js/game.js?v=1774637820"></script>
+<script src="js/world-data.js?v=1774637821"></script>
+<script src="js/game.js?v=1774637821"></script>
 </body>
 </html>

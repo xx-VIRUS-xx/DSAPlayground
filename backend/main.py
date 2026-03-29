@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, RedirectResponse
-from sqlalchemy import create_engine, Column, Integer, String, Text
+from sqlalchemy import create_engine, Column, Integer, String, Text, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 import bcrypt as _bcrypt
@@ -38,6 +38,14 @@ class Progress(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer)
     data = Column(Text)  # JSON string
+
+class Feedback(Base):
+    __tablename__ = "feedback"
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String)
+    message = Column(Text)
+    rating = Column(Integer)
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 Base.metadata.create_all(bind=engine)
 
@@ -146,3 +154,28 @@ def save_progress(data: str = Form(...), user: User = Depends(get_current_user),
         db.add(prog)
     db.commit()
     return {"msg": "Progress saved"}
+
+@app.get("/feedback")
+def get_feedback(db: Session = Depends(get_db)):
+    rows = db.query(Feedback).order_by(Feedback.id.desc()).limit(50).all()
+    return {"feedback": [
+        {"username": r.username, "message": r.message, "rating": r.rating,
+         "created_at": r.created_at.isoformat() if r.created_at else None}
+        for r in rows
+    ]}
+
+@app.post("/feedback")
+def post_feedback(
+    message: str = Form(...),
+    rating: int = Form(...),
+    user: User = Depends(get_current_user),
+    db: Session = Depends(get_db)
+):
+    if len(message.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Feedback must be at least 10 characters")
+    if rating < 1 or rating > 5:
+        raise HTTPException(status_code=400, detail="Rating must be 1–5")
+    fb = Feedback(username=user.username, message=message.strip(), rating=rating)
+    db.add(fb)
+    db.commit()
+    return {"msg": "Feedback saved"}

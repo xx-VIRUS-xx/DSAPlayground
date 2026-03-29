@@ -31,9 +31,10 @@ body { background: var(--bg); color: var(--text); }
 /* ─── INTRO SCREEN ─────────────────────────────── */
 #intro-screen {
   position: fixed; inset: 0; z-index: 100;
-  display: flex; align-items: center; justify-content: center;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
   background: radial-gradient(ellipse at center, #0f1630 0%, #050810 70%);
   transition: opacity 0.7s ease;
+  overflow: hidden;
 }
 
 #intro-screen.fade-out { opacity: 0; pointer-events: none; }
@@ -48,6 +49,7 @@ body { background: var(--bg); color: var(--text); }
   display: flex; flex-direction: column; align-items: center; gap: 20px;
   padding: 40px;
   max-width: 680px;
+  flex: 1; justify-content: center;
 }
 
 .intro-emblem {
@@ -63,7 +65,7 @@ body { background: var(--bg); color: var(--text); }
   font-weight: 900;
   letter-spacing: -1px;
   background: linear-gradient(135deg, #ffd700, #a29bfe, #81ecec);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
   text-shadow: none;
 }
 
@@ -96,6 +98,159 @@ body { background: var(--bg); color: var(--text); }
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .intro-hint { font-size: 0.8rem; color: var(--text-dim); opacity: 0.6; }
+
+/* ─── FEEDBACK SECTION ──────────────────────────── */
+.feedback-section {
+  position: relative; z-index: 2;
+  width: 100%;
+  margin-top: auto;
+  padding: 12px 0 16px;
+  background: linear-gradient(to top, rgba(5,8,16,0.95) 60%, transparent);
+  flex-shrink: 0;
+}
+
+.feedback-heading {
+  text-align: center;
+  font-size: 0.65rem;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  opacity: 0.7;
+  margin-bottom: 10px;
+}
+
+/* ── Submit form ── */
+.feedback-form-wrap {
+  max-width: 480px;
+  margin: 0 auto 12px;
+  padding: 0 16px;
+}
+
+.feedback-form {
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.09);
+  border-radius: 12px;
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 10px;
+}
+
+.feedback-textarea {
+  background: transparent;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-size: 0.82rem;
+  line-height: 1.5;
+  resize: none;
+  width: 100%;
+  font-family: inherit;
+}
+.feedback-textarea::placeholder { color: var(--text-dim); opacity: 0.5; }
+
+.feedback-form-row {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+}
+
+.feedback-stars-pick { display: flex; gap: 4px; cursor: pointer; }
+.fstar {
+  font-size: 1.3rem;
+  color: rgba(255,215,0,0.25);
+  transition: color 0.15s;
+  line-height: 1;
+  touch-action: manipulation;
+}
+.fstar.lit { color: var(--gold); }
+
+.btn-feedback-submit {
+  padding: 6px 20px;
+  border: none; border-radius: 50px;
+  background: linear-gradient(135deg, var(--purple), #a29bfe);
+  color: #fff; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; touch-action: manipulation;
+  transition: var(--transition);
+}
+.btn-feedback-submit:hover { opacity: 0.85; }
+
+.feedback-form-status {
+  font-size: 0.75rem; min-height: 16px;
+  color: var(--green);
+}
+.feedback-form-status.err { color: var(--red); }
+
+/* ── Feed ── */
+.feedback-track {
+  overflow: hidden;
+  width: 100%;
+  mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 6%, black 94%, transparent 100%);
+}
+
+.feedback-inner {
+  display: flex;
+  gap: 12px;
+  padding: 0 20px;
+  width: max-content;
+}
+
+.feedback-inner.scrolling { animation: fbscroll 35s linear infinite; }
+.feedback-inner.scrolling:hover { animation-play-state: paused; }
+
+@keyframes fbscroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.feedback-empty {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  opacity: 0.5;
+  padding: 8px 20px;
+  white-space: nowrap;
+}
+
+.fcard {
+  min-width: 220px; max-width: 220px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex; flex-direction: column; gap: 6px;
+  flex-shrink: 0;
+}
+
+.fcard-top {
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.fcard-name {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.fcard-stars {
+  font-size: 0.65rem;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.fcard-msg {
+  font-size: 0.73rem;
+  line-height: 1.5;
+  color: var(--text-dim);
+  font-style: italic;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* mobile */
+@media (max-width: 640px) {
+  .feedback-section { padding-bottom: calc(10px + env(safe-area-inset-bottom, 0px)); }
+  .fcard { min-width: 190px; max-width: 190px; }
+}
 
 /* ─── WORLD SCREEN ─────────────────────────────── */
 #world-screen {
@@ -516,7 +671,7 @@ body { background: var(--bg); color: var(--text); }
 
 .levelup-stars { font-size: 2rem; margin-bottom: 12px; animation: float 2s ease-in-out infinite; }
 .levelup-title { font-size: 0.8rem; letter-spacing: 4px; font-weight: 900; color: var(--gold); text-transform: uppercase; margin-bottom: 8px; }
-.levelup-level { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, var(--gold), #fff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.levelup-level { font-size: 3rem; font-weight: 900; background: linear-gradient(135deg, var(--gold), #fff); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
 .levelup-msg { font-size: 1rem; color: var(--text-dim); margin: 12px 0 28px; }
 
 .btn-levelup-ok {
@@ -901,6 +1056,13 @@ body { background: var(--bg); color: var(--text); }
 
   /* ── XP toast ── */
   .xp-toast { right: 14px; top: 14%; font-size: 0.95rem; padding: 10px 20px; }
+
+  /* ── Testimonials ── */
+  .testimonials-strip { padding-bottom: 10px; }
+  .tcard { min-width: 200px; max-width: 200px; padding: 12px 13px; }
+  .tcard-avatar { font-size: 1.3rem; }
+  .tcard-quote { font-size: 0.72rem; }
+  .testimonials-inner { animation-duration: 30s; }
 }
 
 /* ─── RESPONSIVE — VERY SMALL (≤ 400px) ────────── */
