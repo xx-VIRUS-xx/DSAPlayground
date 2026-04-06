@@ -17,13 +17,15 @@ A simple FastAPI backend for user accounts and progress caching.
 ## Running Locally
 1. Install dependencies:
    ```sh
-   pip install -r requirements.txt
+   pip install -r backend/requirements.txt
    ```
 2. Start the server:
    ```sh
-   uvicorn main:app --reload
+   uvicorn backend.main:app --reload
    ```
 3. The API will be at `http://localhost:8000`
+
+The backend serves the frontend too, so opening `http://localhost:8000` will load the app.
 
 ## Usage
 - Use the JWT token from `/login` as `Authorization: Bearer <token>` for progress endpoints.

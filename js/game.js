@@ -83,6 +83,29 @@
     return 'locked';
   }
 
+  function getJourneyFocus() {
+    const available = WORLD.realms.find(realm => realmStatus(realm) === 'available' && !isRealmComplete(realm.id));
+    if (available) {
+      const remaining = available.quests.filter(q => !state.completedQuests[q.id]).length;
+      return `Explore ${available.name} and clear ${remaining} quest${remaining === 1 ? '' : 's'}.`;
+    }
+
+    const locked = WORLD.realms.find(realm => realmStatus(realm) === 'locked');
+    if (locked) {
+      const requires = locked.unlockRequires
+        .map(id => WORLD.realms.find(realm => realm.id === id)?.name)
+        .filter(Boolean)
+        .join(', ');
+      return requires ? `Next unlock: ${locked.name} after ${requires}.` : `Next unlock: ${locked.name}.`;
+    }
+
+    return 'Every written realm is complete. Await the next chapter.';
+  }
+
+  function setFeedbackFormVisibility() {
+    document.getElementById('feedback-form-wrap')?.classList.toggle('hidden', !authToken);
+  }
+
   /* ── HUD ───────────────────────────────────────── */
   function updateHUD() {
     const lvl    = state.level;
@@ -100,6 +123,7 @@
     const playable = WORLD.realms.filter(r => !r.comingSoon).length;
     document.getElementById('stat-quests').textContent = `📜 ${totalQ} Quests`;
     document.getElementById('stat-realms').textContent = `🗺️ ${doneR}/${playable} Realms`;
+    document.getElementById('journey-focus').textContent = getJourneyFocus();
 
     const avatars = ['🧙','🧙','🗡️','🗡️','🌿','🌿','🔮','🔮','⚔️','👑'];
     document.getElementById('hero-avatar').textContent = avatars[Math.min(lvl - 1, avatars.length - 1)];
@@ -109,6 +133,7 @@
     const authBtn = document.getElementById('btn-hud-auth');
     authBtn.textContent = currentUser ? '👤' : '🔑';
     authBtn.title       = currentUser ? `Signed in as ${currentUser}` : 'Sign In';
+    setFeedbackFormVisibility();
   }
 
   /* ── XP Toast ──────────────────────────────────── */
@@ -864,11 +889,7 @@
   /* ── Feedback ───────────────────────────────────── */
   function initFeedback() {
     loadFeedback();
-
-    // Show submission form only when logged in
-    if (authToken) {
-      document.getElementById('feedback-form-wrap')?.classList.remove('hidden');
-    }
+    setFeedbackFormVisibility();
 
     // Star picker interaction
     let selectedRating = 0;

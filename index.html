@@ -17,16 +17,18 @@
 ═══════════════════════════════════════════ -->
 <div id="intro-screen">
   <canvas id="star-canvas"></canvas>
+  <div class="intro-veil"></div>
   <div class="intro-content">
+    <div class="intro-kicker">Interactive quest map for DSA and interview prep</div>
     <div class="intro-emblem">⚔️</div>
     <h1 class="intro-title">The Algorithm Chronicles</h1>
     <p class="intro-subtitle">The Kingdom of Code lies in chaos.<br>Ancient data structures crumble. Algorithms fall silent.<br>Only a true <em>Code Wanderer</em> can restore order.</p>
     <div class="intro-stats" id="intro-stats"></div>
-    <button class="btn-start" id="btn-enter-world">
-      <span class="btn-glow"></span>
-      Begin Your Journey
-    </button>
-    <div class="intro-auth-row">
+    <div class="intro-actions">
+      <button class="btn-start" id="btn-enter-world">
+        <span class="btn-glow"></span>
+        Begin Your Journey
+      </button>
       <button class="btn-auth-intro" id="btn-auth-intro">🔑 Sign In to Save Progress</button>
     </div>
     <p class="intro-hint">Free exploration · Learn at your own pace · Master the realm</p>
@@ -89,6 +91,10 @@
     <div class="hud-stats">
       <div class="stat-chip" id="stat-quests">📜 0 Quests</div>
       <div class="stat-chip" id="stat-realms">🗺️ 0/8 Realms</div>
+    </div>
+    <div class="hud-journey">
+      <div class="journey-label">Current Path</div>
+      <div class="journey-value" id="journey-focus">Enter the first realm</div>
     </div>
   </div>
 

@@ -13,7 +13,9 @@ import pathlib
 from datetime import datetime, timedelta
 
 # Root of the project (one level up from backend/)
-PROJECT_ROOT = pathlib.Path(__file__).parent.parent
+BACKEND_ROOT = pathlib.Path(__file__).resolve().parent
+PROJECT_ROOT = BACKEND_ROOT.parent
+DB_PATH = PROJECT_ROOT / "progress.db"
 
 # --- Config ---
 SECRET_KEY = os.environ.get("SECRET_KEY", "supersecret")
@@ -21,7 +23,9 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 * 7  # 1 week
 
 # --- DB Setup ---
-SQLALCHEMY_DATABASE_URL = "sqlite:///./progress.db"
+# Use an absolute SQLite path so the same database is used whether the app is
+# started from the repo root, the backend directory, or a process manager.
+SQLALCHEMY_DATABASE_URL = f"sqlite:///{DB_PATH}"
 engine = create_engine(SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False})
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
@@ -98,6 +102,10 @@ app.add_middleware(
 @app.get("/")
 def serve_index():
     return FileResponse(PROJECT_ROOT / "index.html")
+
+@app.get("/health")
+def health():
+    return {"status": "ok", "db_path": str(DB_PATH)}
 
 # Browser reload after a POST sends another POST to "/", causing 501 on static servers.
 # Redirect it to GET using the PRG (Post/Redirect/Get) pattern.
