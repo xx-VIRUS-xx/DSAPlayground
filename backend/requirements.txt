@@ -1,7 +1,9 @@
-fastapi
-uvicorn
-sqlalchemy
-sqlite-utils
-python-multipart
-bcrypt
-PyJWT
+fastapi==0.124.2
+starlette==0.50.0
+uvicorn==0.37.0
+pydantic==2.12.5
+sqlalchemy==2.0.41
+sqlite-utils==3.38
+python-multipart==0.0.20
+bcrypt==4.3.0
+PyJWT==2.10.1

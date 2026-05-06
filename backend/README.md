@@ -17,6 +17,8 @@ A simple FastAPI backend for user accounts and progress caching.
 ## Running Locally
 1. Install dependencies:
    ```sh
+   python3 -m venv .venv
+   source .venv/bin/activate
    pip install -r backend/requirements.txt
    ```
 2. Start the server:
